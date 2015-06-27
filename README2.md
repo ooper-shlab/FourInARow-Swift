@@ -1,9 +1,9 @@
-# AVCam
+# FourInARow
 
 Translated by OOPer in cooperation with shlab.jp, on 2015/6/27.
 
 Based on
-<https://developer.apple.com/library/prerelease/ios/samplecode/AVCam/Introduction/Intro.html#//apple_ref/doc/uid/DTS40010112>
+<https://developer.apple.com/library/prerelease/ios/samplecode/FourInARow/Introduction/Intro.html#//apple_ref/doc/uid/TP40016142>
 2015-06-08.
 
 As this is a line-by-line translation from the original sample code, "redistribute the Apple Software in its entirety and without modifications" would apply. See LICENSE.txt .
