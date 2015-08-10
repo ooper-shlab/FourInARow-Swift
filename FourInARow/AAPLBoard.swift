@@ -105,92 +105,101 @@ class AAPLBoard: NSObject {
         return true
     }
     
-    func isWinForPlayer(player: AAPLPlayer) -> Bool {
+    func runCountsForPlayer(player: AAPLPlayer) -> [Int] {
         let  chip = player.chip
+        var counts: [Int] = []
         
-        // Detect horizontal wins.
+        // Detect horizontal runs.
         for row in 0..<AAPLBoardHeight {
             var runCount = 0
             for column in 0..<AAPLBoardWidth {
                 if self.chipInColumn(column, row: row) == chip {
-                    if ++runCount == AAPLCountToWin {
-                        return true
-                    }
-                } else if column >= AAPLBoardWidth - AAPLCountToWin {
-                    // No need to check for runs that start past this column.
-                    break
+                    ++runCount
                 } else {
-                    // Run isn't continuing, reset counter.
+                    // Run isn't continuing, note it and reset counter.
+                    if runCount > 1 { //###
+                        counts.append(runCount)
+                    }
                     runCount = 0
                 }
             }
+            if runCount > 1 { //###
+                // Note the run if still on one at the end of the row.
+                counts.append(runCount)
+            }
         }
         
-        // Detect vertical wins.
+        // Detect vertical runs.
         for column in 0..<AAPLBoardWidth {
             var runCount = 0
             for row in 0..<AAPLBoardHeight {
                 if self.chipInColumn(column, row: row) == chip {
-                    if ++runCount == AAPLCountToWin {
-                        return true
-                    }
-                } else if row >= AAPLBoardHeight - AAPLCountToWin {
-                    // No need to check for runs that start past this row.
-                    break
+                    ++runCount
                 } else {
-                    // Run isn't continuing, reset counter.
+                    // Run isn't continuing, note it and reset counter.
+                    if runCount > 1 { //###
+                        counts.append(runCount)
+                    }
                     runCount = 0
                 }
             }
-        }
-        
-        /*
-        Detect diagonal (northeast) wins.
-        Start by looking for a matching chip in column-major order.
-        */
-        //for column in 0..<(AAPLBoardWidth - AAPLCountToWin) { //### bug?
-        for column in 0...(AAPLBoardWidth - AAPLCountToWin) {
-            //for row in 0..<(AAPLBoardHeight - AAPLCountToWin) { //### bug?
-            for row in 0...(AAPLBoardHeight - AAPLCountToWin) {
-                if self.chipInColumn(column, row: row) == chip {
-                    // Found a matching chip, switch to searching diagonal.
-                    var runCount = 1
-                    
-                    for i in 1..<AAPLCountToWin {
-                        if self.chipInColumn((column + i), row: (row + i)) == chip {
-                            if ++runCount == AAPLCountToWin {
-                                return true
-                            }
-                        }
-                    }
-                }
+            if runCount > 1 { //###
+                // Note the run if still on one at the end of the column.
+                counts.append(runCount)
             }
         }
         
-        /*
-        Detect diagonal (southeast) wins. Start by looking for a matching chip in
-        column-major order.
-        */
-        //for column in 0..<(AAPLBoardWidth - AAPLCountToWin) {   //### bug?
-        for column in 0...(AAPLBoardWidth - AAPLCountToWin) {
-            //for row in (1 ... (AAPLBoardHeight - AAPLCountToWin) + 1).reverse() {   //### bug?
-            for row in (AAPLCountToWin-1 ..< AAPLBoardHeight).reverse() {
-                if self.chipInColumn(column, row: row) == chip {
-                    // Found a matching chip, switch to searching diagonal.
-                    var runCount = 1
-                    for i in 1..<AAPLCountToWin {
-                        if self.chipInColumn((column + i), row: (row - i)) == chip {
-                            if ++runCount == AAPLCountToWin {
-                                return true
-                            }
-                        }
-                    }
+        // Detect diagonal (northeast) runs
+        for startColumn in -AAPLBoardHeight..<AAPLBoardWidth {
+            // Start from off the edge of the board to catch all the diagonal lines through it.
+            var runCount = 0
+            for offset in 0..<AAPLBoardHeight {
+                let column = startColumn + offset
+                if column < 0 || column >= AAPLBoardWidth { //###
+                    continue // Ignore areas that aren't on the board.
                 }
+                if self.chipInColumn(column, row: offset) == chip {
+                    ++runCount
+                } else {
+                    // Run isn't continuing, note it and reset counter.
+                    if runCount > 1 { //###
+                        counts.append(runCount)
+                    }
+                    runCount = 0
+                }
+            }
+            if runCount > 1 {
+                // Note the run if still on one at the end of the line.
+                counts.append(runCount)
             }
         }
         
-        // No win detected by this point => no win on board.
-        return false
+        // Detect diagonal (northwest) runs
+        for startColumn in 0..<AAPLBoardWidth + AAPLBoardHeight {
+            // Iterate through areas off the edge of the board to catch all the diagonal lines through it.
+            var runCount = 0
+            for offset in 0..<AAPLBoardHeight {
+                let column = startColumn - offset
+                if column < 0 || column >= AAPLBoardWidth { //###
+                    continue // Ignore areas that aren't on the board.
+                }
+                if self.chipInColumn(column, row: offset) == chip {
+                    ++runCount
+                } else {
+                    // Run isn't continuing, note it and reset counter.
+                    if runCount > 1 { //###
+                        counts.append(runCount)
+                    }
+                    runCount = 0
+                }
+            }
+            if runCount > 1 { //###
+                // Note the run if still on one at the end of the line.
+                counts.append(runCount)
+            }
+        }
+        
+        return counts
     }
     
 }

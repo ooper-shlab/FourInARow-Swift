@@ -20,7 +20,7 @@ import GameplayKit
 class AAPLViewController: UIViewController {
     
     // Switch this off to manually make moves for the black (O) player.
-    // -DUSE_AI_PLAYER=1    //###See Build Settings>Swift Compiler - Custom Flags>Other Swift Flags
+    // -D USE_AI_PLAYER    //###See Build Settings>Swift Compiler - Custom Flags>Other Swift Flags
     
     private var board: AAPLBoard!
     private var strategist: GKMinmaxStrategist!

@@ -46,6 +46,8 @@ extension AAPLPlayer: GKGameModelPlayer {
 
 extension AAPLBoard: GKGameModel {
     
+    //MARK: - Managing players
+    
     var players: [GKGameModelPlayer]? {
         return AAPLPlayer.allPlayers
     }
@@ -53,6 +55,8 @@ extension AAPLBoard: GKGameModel {
     var activePlayer: GKGameModelPlayer? {
         return self.currentPlayer
     }
+    
+    //MARK: - Copying board state
     
     func copyWithZone(zone: NSZone) -> AnyObject {
         let copy = AAPLBoard()
@@ -66,11 +70,9 @@ extension AAPLBoard: GKGameModel {
         self.currentPlayer = model.currentPlayer
     }
     
+    //MARK: - Finding & applying moves
+    
     func gameModelUpdatesForPlayer(player: GKGameModelPlayer) -> [GKGameModelUpdate]? {
-        let thePlayer = player as! AAPLPlayer
-        if self.isWinForPlayer(thePlayer) || self.isWinForPlayer(thePlayer.opponent!) {
-            return nil
-        }
         
         var moves: [AAPLMove] = []
         moves.reserveCapacity(AAPLBoard.width())
@@ -82,7 +84,6 @@ extension AAPLBoard: GKGameModel {
         
         // Will be empty if isFull.
         return moves
-        //    return nil;
     }
     
     func applyGameModelUpdate(gameModelUpdate: GKGameModelUpdate) {
@@ -91,24 +92,52 @@ extension AAPLBoard: GKGameModel {
         self.currentPlayer = self.currentPlayer.opponent!
     }
     
+    //MARK: - Evaluating board state
+    
+    func isWinForPlayer(player: GKGameModelPlayer) -> Bool {
+        // Use AAPLBoard's utility method to find all N-in-a-row runs of the player's chip.
+        let thePlayer = player as! AAPLPlayer
+        let runCounts = self.runCountsForPlayer(thePlayer)
+        
+        // The player wins if there are any runs of 4 (or more, but that shouldn't happen in a regular game).
+        let longestRun = runCounts.maxElement()
+        return longestRun >= AAPLCountToWin
+    }
+    
+    func isLossForPlayer(player: GKGameModelPlayer) -> Bool {
+        // This is a two-player game, so a win for the opponent is a loss for the player.
+        let thePlayer = player as! AAPLPlayer
+        return self.isWinForPlayer(thePlayer.opponent!)
+    }
+    
     func scoreForPlayer(player: GKGameModelPlayer) -> Int {
         let thePlayer = player as! AAPLPlayer
         /*
-        This heuristic isn't very smart -- it sees an imminent win/loss and
-        a future win/loss as equivalent. Try weighting the score based on
-        how many moves have been made, or devising your own metric for how
-        close a player is to winning.
+        Heuristic: the chance of winning soon is related to the number and length
+        of N-in-a-row runs of chips. For example, a player with two runs of two chips each
+        is more likely to win soon than a player with no runs.
+        
+        Scoring should weigh the player's chance of success against that of failure,
+        which in a two-player game means success for the opponent. Sum the player's number
+        and size of runs, and subtract from it the same score for the opponent.
+        
+        This is not the best possible heuristic for Four-In-A-Row, but it produces
+        moderately strong gameplay. Try these improvements:
+        - Account for "broken runs"; e.g. a row of two chips, then a space, then a third chip.
+        - Weight the run lengths; e.g. two runs of three is better than three runs of two.
         */
-        if self.isWinForPlayer(thePlayer) {
-            return 100
-        } else if self.isWinForPlayer(thePlayer.opponent!) {
-            return -100
-        } else {
-            /*
-            A smarter heuristic would do more with this case:
-            The game isn't won yet, but how close is a win?
-            */
-            return 0
-        }
+        
+        // Use AAPLBoard's utility method to find all runs of the player's chip and sum their length.
+        let playerRunCounts = self.runCountsForPlayer(thePlayer)
+        if playerRunCounts.maxElement() >= AAPLCountToWin {return 9999} //###
+        let playerTotal = playerRunCounts.map{$0 * $0}.reduce(0, combine: +) //###
+        
+        // Repeat for the opponent's chip.
+        let opponentRunCounts = self.runCountsForPlayer(thePlayer.opponent!)
+        if opponentRunCounts.maxElement() >= AAPLCountToWin {return -9999} //###
+        let opponentTotal = opponentRunCounts.map{$0 * $0}.reduce(0, combine: +) //###
+        
+        // Return the sum of player runs minus the sum of opponent runs.
+        return playerTotal - opponentTotal
     }
 }

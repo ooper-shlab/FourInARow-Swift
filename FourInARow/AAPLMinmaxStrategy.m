@@ -36,6 +36,8 @@
 
 @implementation AAPLBoard (MinmaxStrategy)
 
+#pragma mark - Managing players
+
 - (NSArray<AAPLPlayer *> *)players {
     return [AAPLPlayer allPlayers];
 }
@@ -43,6 +45,8 @@
 - (AAPLPlayer *)activePlayer {
     return self.currentPlayer;
 }
+
+#pragma mark - Copying board state
 
 - (__nonnull id)copyWithZone:(nullable NSZone *)zone {
     AAPLBoard *copy = [[[self class] allocWithZone:zone] init];
@@ -55,11 +59,9 @@
     self.currentPlayer = gameModel.currentPlayer;
 }
 
-- (NSArray<AAPLMove *> *)gameModelUpdatesForPlayer:(AAPLPlayer *)player {
-    if ([self isWinForPlayer:player] || [self isWinForPlayer:player.opponent]) {
-        return nil;
-    }
-    
+#pragma mark - Finding & applying moves
+
+- (NSArray<AAPLMove *> *)gameModelUpdatesForPlayer:(AAPLPlayer *)player {    
     NSMutableArray<AAPLMove *> *moves = [NSMutableArray arrayWithCapacity:AAPLBoard.width];
     for (NSInteger column = 0; column < AAPLBoard.width; column++) {
         if ([self canMoveInColumn:column]) {
@@ -69,7 +71,6 @@
 
     // Will be empty if isFull.
     return moves;
-    return nil;
 }
 
 - (void)applyGameModelUpdate:(AAPLMove *)gameModelUpdate {
@@ -77,26 +78,48 @@
     self.currentPlayer = self.currentPlayer.opponent;
 }
 
+#pragma mark - Evaluating board state
+
+- (BOOL)isWinForPlayer:(AAPLPlayer *)player {
+	// Use AAPLBoard's utility method to find all N-in-a-row runs of the player's chip.
+	NSArray<NSNumber *> *runCounts = [self runCountsForPlayer:player];
+
+	// The player wins if there are any runs of 4 (or more, but that shouldn't happen in a regular game).
+	NSNumber *longestRun = [runCounts valueForKeyPath:@"@max.self"];
+	return longestRun.integerValue >= AAPLCountToWin;
+}
+
+- (BOOL)isLossForPlayer:(AAPLPlayer *)player {
+	// This is a two-player game, so a win for the opponent is a loss for the player.
+	return [self isWinForPlayer:player.opponent];
+}
+
 - (NSInteger)scoreForPlayer:(AAPLPlayer *)player {
-    /*
-        This heuristic isn't very smart -- it sees an imminent win/loss and
-        a future win/loss as equivalent. Try weighting the score based on 
-        how many moves have been made, or devising your own metric for how
-        close a player is to winning.
-    */
-    if ([self isWinForPlayer:player]) {
-        return 100;
-    }
-    else if ([self isWinForPlayer:player.opponent]) {
-        return -100;
-    }
-    else {
-        /*
-            A smarter heuristic would do more with this case:
-            The game isn't won yet, but how close is a win?
-        */
-        return 0;
-    }
+	/*
+		Heuristic: the chance of winning soon is related to the number and length
+		of N-in-a-row runs of chips. For example, a player with two runs of two chips each
+		is more likely to win soon than a player with no runs.
+	 
+		Scoring should weigh the player's chance of success against that of failure,
+		which in a two-player game means success for the opponent. Sum the player's number
+		and size of runs, and subtract from it the same score for the opponent.
+	 
+	 	This is not the best possible heuristic for Four-In-A-Row, but it produces
+		moderately strong gameplay. Try these improvements:
+			- Account for "broken runs"; e.g. a row of two chips, then a space, then a third chip.
+			- Weight the run lengths; e.g. two runs of three is better than three runs of two.
+	*/
+
+	// Use AAPLBoard's utility method to find all runs of the player's chip and sum their length.
+	NSArray<NSNumber *> *playerRunCounts = [self runCountsForPlayer:player];
+	NSNumber *playerTotal = [playerRunCounts valueForKeyPath:@"@sum.self"];
+
+	// Repeat for the opponent's chip.
+	NSArray<NSNumber *> *opponentRunCounts = [self runCountsForPlayer:player.opponent];
+	NSNumber *opponentTotal = [opponentRunCounts valueForKeyPath:@"@sum.self"];
+
+	// Return the sum of player runs minus the sum of opponent runs.
+	return playerTotal.integerValue - opponentTotal.integerValue;
 }
 
 @end

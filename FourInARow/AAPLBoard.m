@@ -10,7 +10,6 @@
 
 const static NSInteger AAPLBoardWidth = 7;
 const static NSInteger AAPLBoardHeight = 6;
-const static NSInteger AAPLCountToWin = 4;
 
 @implementation AAPLBoard {
     AAPLChip _cells[AAPLBoardWidth * AAPLBoardHeight];
@@ -98,92 +97,105 @@ const static NSInteger AAPLCountToWin = 4;
     return YES;
 }
 
-- (BOOL)isWinForPlayer:(AAPLPlayer *)player {
+- (NSArray<NSNumber *> *)runCountsForPlayer:(AAPLPlayer *)player {
 	AAPLChip chip = player.chip;
+	NSMutableArray<NSNumber *> *counts = [NSMutableArray array];
 	
-    // Detect horizontal wins.
+    // Detect horizontal runs.
     for (NSInteger row = 0; row < AAPLBoardHeight; row++) {
         NSInteger runCount = 0;
         for (NSInteger column = 0; column < AAPLBoardWidth; column++) {
             if ([self chipInColumn:column row:row] == chip) {
-                if (++runCount == AAPLCountToWin) {
-                    return YES;
-                }
-            }
-            else if (column >= AAPLBoardWidth - AAPLCountToWin) {
-                // No need to check for runs that start past this column.
-                break;
-            }
+				++runCount;
+			}
             else {
-                // Run isn't continuing, reset counter.
+                // Run isn't continuing, note it and reset counter.
+				if (runCount > 0) {
+					[counts addObject:@(runCount)];
+				}
                 runCount = 0;
             }
         }
+		if (runCount > 0) {
+			// Note the run if still on one at the end of the row.
+			[counts addObject:@(runCount)];
+		}
     }
     
-    // Detect vertical wins.
+    // Detect vertical runs.
     for (NSInteger column = 0; column < AAPLBoardWidth; column++) {
         NSInteger runCount = 0;
         for (NSInteger row = 0; row < AAPLBoardHeight; row++) {
             if ([self chipInColumn:column row:row] == chip) {
-                if (++runCount == AAPLCountToWin) {
-                    return YES;
-                }
-            }
-            else if (row >= AAPLBoardHeight - AAPLCountToWin) {
-                // No need to check for runs that start past this row.
-                break;
+				++runCount;
             }
             else {
-                // Run isn't continuing, reset counter.
-                runCount = 0;
-            }
-        }
+				// Run isn't continuing, note it and reset counter.
+				if (runCount > 0) {
+					[counts addObject:@(runCount)];
+				}
+				runCount = 0;
+			}
+		}
+		if (runCount > 0) {
+			// Note the run if still on one at the end of the column.
+			[counts addObject:@(runCount)];
+		}
     }
-    
-    /*
-        Detect diagonal (northeast) wins.
-        Start by looking for a matching chip in column-major order.
-    */
-    for (NSInteger column = 0; column <= (AAPLBoardWidth - AAPLCountToWin); column++) {
-        for (NSInteger row = 0; row <= (AAPLBoardHeight - AAPLCountToWin); row++) {
-            if ([self chipInColumn:column row:row] == chip) {
-                // Found a matching chip, switch to searching diagonal.
-                NSInteger runCount = 1;
 
-                for (NSInteger i = 1; i < AAPLCountToWin; i++) {
-                    if ([self chipInColumn:(column + i) row:(row + i)] == chip) {
-                        if (++runCount == AAPLCountToWin) {
-                            return YES;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    /*
-        Detect diagonal (southeast) wins. Start by looking for a matching chip in
-        column-major order.
-    */
-    for (NSInteger column = 0; column <= (AAPLBoardWidth - AAPLCountToWin); column++) {
-        for (NSInteger row = (AAPLBoardHeight - AAPLCountToWin) + 1; row > 0; row--) {
-            if ([self chipInColumn:column row:row] == chip) {
-                // Found a matching chip, switch to searching diagonal.
-                NSInteger runCount = 1;
-                for (NSInteger i = 1; i < AAPLCountToWin; i++) {
-                    if ([self chipInColumn:(column + i) row:(row - i)] == chip) {
-                        if (++runCount == AAPLCountToWin) {
-                            return YES;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    // No win detected by this point => no win on board.
-    return NO;
+	// Detect diagonal (northeast) runs
+	for (NSInteger startColumn = -AAPLBoardHeight; startColumn < AAPLBoardWidth; startColumn++) {
+		// Start from off the edge of the board to catch all the diagonal lines through it.
+		NSInteger runCount = 0;
+		for (NSInteger offset = 0; offset < AAPLBoardHeight; offset++) {
+			NSInteger column = startColumn + offset;
+			if (column < 0 || column > AAPLBoardWidth) {
+				continue; // Ignore areas that aren't on the board.
+			}
+			if ([self chipInColumn:column row:offset] == chip) {
+				++runCount;
+			}
+			else {
+				// Run isn't continuing, note it and reset counter.
+				if (runCount > 0) {
+					[counts addObject:@(runCount)];
+				}
+				runCount = 0;
+			}
+		}
+		if (runCount > 0) {
+			// Note the run if still on one at the end of the line.
+			[counts addObject:@(runCount)];
+		}
+	}
+
+	// Detect diagonal (northwest) runs
+	for (NSInteger startColumn = 0; startColumn < AAPLBoardWidth + AAPLBoardHeight; startColumn++) {
+		// Iterate through areas off the edge of the board to catch all the diagonal lines through it.
+		NSInteger runCount = 0;
+		for (NSInteger offset = 0; offset < AAPLBoardHeight; offset++) {
+			NSInteger column = startColumn - offset;
+			if (column < 0 || column > AAPLBoardWidth) {
+				continue; // Ignore areas that aren't on the board.
+			}
+			if ([self chipInColumn:column row:offset] == chip) {
+				++runCount;
+			}
+			else {
+				// Run isn't continuing, note it and reset counter.
+				if (runCount > 0) {
+					[counts addObject:@(runCount)];
+				}
+				runCount = 0;
+			}
+		}
+		if (runCount > 0) {
+			// Note the run if still on one at the end of the line.
+			[counts addObject:@(runCount)];
+		}
+	}
+
+    return counts;
 }
 
 @end

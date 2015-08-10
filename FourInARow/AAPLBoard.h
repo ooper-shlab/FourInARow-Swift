@@ -10,6 +10,8 @@
 
 #import "AAPLPlayer.h"
 
+const static NSInteger AAPLCountToWin = 4;
+
 @interface AAPLBoard : NSObject
 
 @property AAPLPlayer *currentPlayer;
@@ -21,7 +23,8 @@
 - (BOOL)canMoveInColumn:(NSInteger)column;
 - (void)addChip:(AAPLChip)chip inColumn:(NSInteger)column;
 - (BOOL)isFull;
-- (BOOL)isWinForPlayer:(AAPLPlayer *)player;
+
+- (NSArray<NSNumber *> *)runCountsForPlayer:(AAPLPlayer *)player;
 
 - (void)updateChipsFromBoard:(AAPLBoard *)otherBoard;
 

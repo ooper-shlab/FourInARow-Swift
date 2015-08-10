@@ -364,7 +364,7 @@
 				ENABLE_TESTABILITY = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/FourInARow/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-DUSE_AI_PLAYER=1";
+				OTHER_SWIFT_FLAGS = "-D USE_AI_PLAYER";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -377,7 +377,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/FourInARow/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_SWIFT_FLAGS = "-DUSE_AI_PLAYER=1";
+				OTHER_SWIFT_FLAGS = "-D USE_AI_PLAYER";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
