@@ -26,11 +26,11 @@ class AAPLBoard: NSObject {
     
     var _cells: [AAPLChip] = Array(count: AAPLBoardWidth * AAPLBoardHeight, repeatedValue: .None)
     
-    class func width() -> Int {
+    class var width: Int {
         return AAPLBoardWidth
     }
     
-    class func height() -> Int {
+    class var height: Int {
         return AAPLBoardHeight
     }
     

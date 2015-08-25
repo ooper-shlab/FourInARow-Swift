@@ -38,9 +38,9 @@ class AAPLViewController: UIViewController {
         self.strategist.maxLookAheadDepth = 7
         self.strategist.randomSource = GKARC4RandomSource()
         
-        self.chipLayers.reserveCapacity(AAPLBoard.width())
-        for _ in 0..<AAPLBoard.width() {
-            self.chipLayers.append(NSMutableArray(capacity: AAPLBoard.height()))
+        self.chipLayers.reserveCapacity(AAPLBoard.width)
+        for _ in 0..<AAPLBoard.width {
+            self.chipLayers.append(NSMutableArray(capacity: AAPLBoard.height))
         }
         
         self.resetBoard()
@@ -76,7 +76,7 @@ class AAPLViewController: UIViewController {
         let column = button.tag
         button.enabled = self.board.canMoveInColumn(column)
         
-        var row = AAPLBoard.height()
+        var row = AAPLBoard.height
         var chip = AAPLChip.None
         while chip == .None && row > 0 {
             chip = self.board.chipInColumn(column, row: --row)

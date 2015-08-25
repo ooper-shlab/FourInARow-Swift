@@ -75,8 +75,8 @@ extension AAPLBoard: GKGameModel {
     func gameModelUpdatesForPlayer(player: GKGameModelPlayer) -> [GKGameModelUpdate]? {
         
         var moves: [AAPLMove] = []
-        moves.reserveCapacity(AAPLBoard.width())
-        for column in 0..<AAPLBoard.width() {
+        moves.reserveCapacity(AAPLBoard.width)
+        for column in 0..<AAPLBoard.width {
             if self.canMoveInColumn(column) {
                 moves.append(AAPLMove.moveInColumn(column))
             }
