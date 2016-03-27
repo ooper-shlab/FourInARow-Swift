@@ -79,7 +79,8 @@ class AAPLViewController: UIViewController {
         var row = AAPLBoard.height
         var chip = AAPLChip.None
         while chip == .None && row > 0 {
-            chip = self.board.chipInColumn(column, row: --row)
+            row -= 1
+            chip = self.board.chipInColumn(column, row: row)
         }
         
         if chip != AAPLChip.None {

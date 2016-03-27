@@ -172,7 +172,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = Apple;
 				TargetAttributes = {
 					11D1E0DB1AB9EC7200B51FA0 = {
@@ -295,6 +295,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -365,6 +366,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/FourInARow/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D USE_AI_PLAYER";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.FourInARow";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -378,6 +380,7 @@
 				INFOPLIST_FILE = "$(SRCROOT)/FourInARow/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D USE_AI_PLAYER";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.FourInARow";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -389,6 +392,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = FourInARowTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.FourInARowTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -403,6 +407,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = FourInARowTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.example.apple-samplecode.FourInARowTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FourInARow.app/FourInARow";

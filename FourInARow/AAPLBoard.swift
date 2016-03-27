@@ -114,7 +114,7 @@ class AAPLBoard: NSObject {
             var runCount = 0
             for column in 0..<AAPLBoardWidth {
                 if self.chipInColumn(column, row: row) == chip {
-                    ++runCount
+                    runCount += 1
                 } else {
                     // Run isn't continuing, note it and reset counter.
                     if runCount > 1 { //###
@@ -134,7 +134,7 @@ class AAPLBoard: NSObject {
             var runCount = 0
             for row in 0..<AAPLBoardHeight {
                 if self.chipInColumn(column, row: row) == chip {
-                    ++runCount
+                    runCount += 1
                 } else {
                     // Run isn't continuing, note it and reset counter.
                     if runCount > 1 { //###
@@ -159,7 +159,7 @@ class AAPLBoard: NSObject {
                     continue // Ignore areas that aren't on the board.
                 }
                 if self.chipInColumn(column, row: offset) == chip {
-                    ++runCount
+                    runCount += 1
                 } else {
                     // Run isn't continuing, note it and reset counter.
                     if runCount > 1 { //###
@@ -184,7 +184,7 @@ class AAPLBoard: NSObject {
                     continue // Ignore areas that aren't on the board.
                 }
                 if self.chipInColumn(column, row: offset) == chip {
-                    ++runCount
+                    runCount += 1
                 } else {
                     // Run isn't continuing, note it and reset counter.
                     if runCount > 1 { //###
