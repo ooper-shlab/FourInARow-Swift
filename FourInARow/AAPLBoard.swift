@@ -24,7 +24,7 @@ class AAPLBoard: NSObject {
     
     var currentPlayer: AAPLPlayer
     
-    var _cells: [AAPLChip] = Array(count: AAPLBoardWidth * AAPLBoardHeight, repeatedValue: .None)
+    var _cells: [AAPLChip] = Array(repeating: .none, count: AAPLBoardWidth * AAPLBoardHeight)
     
     class var width: Int {
         return AAPLBoardWidth
@@ -40,23 +40,23 @@ class AAPLBoard: NSObject {
         
     }
     
-    func updateChipsFromBoard(otherBoard: AAPLBoard) {
+    func updateChipsFromBoard(_ otherBoard: AAPLBoard) {
         self._cells = otherBoard._cells
     }
     
-    func chipInColumn(column: Int, row: Int) -> AAPLChip {
+    func chipInColumn(_ column: Int, row: Int) -> AAPLChip {
         assert(0 <= column && column < AAPLBoardWidth && 0 <= row && row < AAPLBoardHeight, "!")
         return _cells[row + column * AAPLBoardHeight]
     }
     
-    private func setChip(chip: AAPLChip, inColumn column: Int, row: Int) {
+    private func setChip(_ chip: AAPLChip, inColumn column: Int, row: Int) {
         _cells[row + column * AAPLBoardHeight] = chip
     }
     
     override var debugDescription: String {
         var output = ""
         
-        for row in (0..<AAPLBoardHeight).reverse() {
+        for row in (0..<AAPLBoardHeight).reversed() {
             for column in 0..<AAPLBoardWidth {
                 let chip = self.chipInColumn(column, row: row)
                 
@@ -73,9 +73,9 @@ class AAPLBoard: NSObject {
         return output
     }
     
-    private func nextEmptySlotInColumn(column: Int) -> Int {
+    private func nextEmptySlotInColumn(_ column: Int) -> Int {
         for row in 0..<AAPLBoardHeight {
-            if self.chipInColumn(column, row: row) == .None {
+            if self.chipInColumn(column, row: row) == .none {
                 return row
             }
         }
@@ -83,11 +83,11 @@ class AAPLBoard: NSObject {
         return -1
     }
     
-    func canMoveInColumn(column: Int) -> Bool {
+    func canMoveInColumn(_ column: Int) -> Bool {
         return self.nextEmptySlotInColumn(column) >= 0
     }
     
-    func addChip(chip: AAPLChip, inColumn column: Int) {
+    func addChip(_ chip: AAPLChip, inColumn column: Int) {
         let row = self.nextEmptySlotInColumn(column)
         
         if row >= 0 {
@@ -105,7 +105,7 @@ class AAPLBoard: NSObject {
         return true
     }
     
-    func runCountsForPlayer(player: AAPLPlayer) -> [Int] {
+    func runCountsForPlayer(_ player: AAPLPlayer) -> [Int] {
         let  chip = player.chip
         var counts: [Int] = []
         

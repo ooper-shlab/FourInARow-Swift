@@ -16,9 +16,9 @@
 import UIKit
 
 enum AAPLChip: Int {
-    case None = 0
-    case Red
-    case Black
+    case none = 0
+    case red
+    case black
 }
 
 @objc(AAPLPlayer)
@@ -33,15 +33,15 @@ class AAPLPlayer: NSObject {
     }
     
     class func redPlayer() -> AAPLPlayer {
-        return self.playerForChip(.Red)!
+        return self.playerForChip(.red)!
     }
     
     class func blackPlayer() -> AAPLPlayer {
-        return self.playerForChip(.Black)!
+        return self.playerForChip(.black)!
     }
     
-    class func playerForChip(chip: AAPLChip) -> AAPLPlayer? {
-        if chip == .None {
+    class func playerForChip(_ chip: AAPLChip) -> AAPLPlayer? {
+        if chip == .none {
             return nil
         }
         
@@ -51,18 +51,18 @@ class AAPLPlayer: NSObject {
     
     static var allPlayers: [AAPLPlayer] = [
         
-        AAPLPlayer(chip: .Red),
-        AAPLPlayer(chip: .Black),
+        AAPLPlayer(chip: .red),
+        AAPLPlayer(chip: .black),
         
     ]
     
     var color: UIColor? {
         switch self.chip {
-        case .Red:
-            return UIColor.redColor()
+        case .red:
+            return UIColor.red
             
-        case .Black:
-            return UIColor.blackColor()
+        case .black:
+            return UIColor.black
             
         default:
             return nil
@@ -71,10 +71,10 @@ class AAPLPlayer: NSObject {
     
     var name: String? {
         switch self.chip {
-        case .Red:
+        case .red:
             return "Red"
             
-        case .Black:
+        case .black:
             return "Black"
             
         default:
@@ -84,10 +84,10 @@ class AAPLPlayer: NSObject {
     
     override var debugDescription: String {
         switch self.chip {
-        case .Red:
+        case .red:
             return "X"
             
-        case .Black:
+        case .black:
             return "O"
             
         default:
@@ -97,10 +97,10 @@ class AAPLPlayer: NSObject {
     
     var opponent: AAPLPlayer? {
         switch self.chip {
-        case .Red:
+        case .red:
             return AAPLPlayer.blackPlayer()
             
-        case .Black:
+        case .black:
             return AAPLPlayer.redPlayer()
             
         default:

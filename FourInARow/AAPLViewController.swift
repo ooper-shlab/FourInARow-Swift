@@ -27,7 +27,7 @@ class AAPLViewController: UIViewController {
     @IBOutlet var columnButtons: [UIButton]!
     
     private var chipPath: UIBezierPath?
-    private var chipLayers: [NSMutableArray] = []
+    private var chipLayers: [[CAShapeLayer]] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,10 +38,7 @@ class AAPLViewController: UIViewController {
         self.strategist.maxLookAheadDepth = 7
         self.strategist.randomSource = GKARC4RandomSource()
         
-        self.chipLayers.reserveCapacity(AAPLBoard.width)
-        for _ in 0..<AAPLBoard.width {
-            self.chipLayers.append(NSMutableArray(capacity: AAPLBoard.height))
-        }
+        self.chipLayers = Array(repeating: [], count: AAPLBoard.width)
         
         self.resetBoard()
     }
@@ -49,20 +46,19 @@ class AAPLViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         let button = self.columnButtons[0]
         let length = min(button.frame.size.width - 10, button.frame.size.height / 6 - 10)
-        let rect = CGRectMake(0, 0, length, length)
-        self.chipPath = UIBezierPath(ovalInRect: rect)
+        let rect = CGRect(x: 0, y: 0, width: length, height: length)
+        self.chipPath = UIBezierPath(ovalIn: rect)
         
-        for (column, columnLayers) in self.chipLayers.enumerate() {
-            columnLayers.enumerateObjectsUsingBlock {chip, row, stop in
-                let theChip = chip as! CAShapeLayer
-                theChip.path = self.chipPath!.CGPath
+        for (column, columnLayers) in self.chipLayers.enumerated() {
+            for (row, theChip) in columnLayers.enumerated() {
+                theChip.path = self.chipPath!.cgPath
                 theChip.frame = self.chipPath!.bounds
                 theChip.position = self.positionForChipLayerAtColumn(column, row: row)
             }
         }
     }
     
-    @IBAction func makeMove(sender: UIButton) {
+    @IBAction func makeMove(_ sender: UIButton) {
         let column = sender.tag
         
         if self.board.canMoveInColumn(column) {
@@ -72,37 +68,37 @@ class AAPLViewController: UIViewController {
         }
     }
     
-    private func updateButton(button: UIButton) {
+    private func updateButton(_ button: UIButton) {
         let column = button.tag
-        button.enabled = self.board.canMoveInColumn(column)
+        button.isEnabled = self.board.canMoveInColumn(column)
         
         var row = AAPLBoard.height
-        var chip = AAPLChip.None
-        while chip == .None && row > 0 {
+        var chip = AAPLChip.none
+        while chip == .none && row > 0 {
             row -= 1
             chip = self.board.chipInColumn(column, row: row)
         }
         
-        if chip != AAPLChip.None {
+        if chip != AAPLChip.none {
             self.addChipLayerAtColumn(column, row: row, color: AAPLPlayer.playerForChip(chip)!.color!)
         }
     }
     
-    private func positionForChipLayerAtColumn(column: Int, row: Int) -> CGPoint {
+    private func positionForChipLayerAtColumn(_ column: Int, row: Int) -> CGPoint {
         let columnButton = self.columnButtons[column]
-        let xOffset = CGRectGetMidX(columnButton.frame)
+        let xOffset = columnButton.frame.midX
         let yStride = self.chipPath!.bounds.size.height + 10
-        let yOffset = CGRectGetMaxY(columnButton.frame) - yStride / 2
-        return CGPointMake(xOffset, yOffset - yStride * CGFloat(row))
+        let yOffset = columnButton.frame.maxY - yStride / 2
+        return CGPoint(x: xOffset, y: yOffset - yStride * CGFloat(row))
     }
     
-    private func addChipLayerAtColumn(column: Int, row: Int, color: UIColor) {
+    private func addChipLayerAtColumn(_ column: Int, row: Int, color: UIColor) {
         if (self.chipLayers[column].count < row + 1) {
             // Create and position a layer for the new chip.
             let newChip = CAShapeLayer()
-            newChip.path = self.chipPath!.CGPath
+            newChip.path = self.chipPath!.cgPath
             newChip.frame = self.chipPath!.bounds
-            newChip.fillColor = color.CGColor
+            newChip.fillColor = color.cgColor
             newChip.position = self.positionForChipLayerAtColumn(column, row: row)
             
             // Animate the chip falling into place.
@@ -112,8 +108,8 @@ class AAPLViewController: UIViewController {
             animation.toValue = newChip.position.y
             animation.duration = 0.5
             animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseIn)
-            newChip.addAnimation(animation, forKey: nil)
-            self.chipLayers[column][row] = newChip
+            newChip.add(animation, forKey: nil)
+            self.chipLayers[column] = self.chipLayers[column] + [newChip]
         }
     }
     
@@ -126,32 +122,32 @@ class AAPLViewController: UIViewController {
         
         self.strategist.gameModel = self.board
         
-        for column in self.chipLayers {
-            for chip in column as NSArray as! [CAShapeLayer] {
+        for (columnIndex, column) in self.chipLayers.enumerated() {
+            for chip in column {
                 chip.removeFromSuperlayer()
             }
-            column.removeAllObjects()
+            self.chipLayers[columnIndex] = []
         }
     }
     
     private func updateGame() {
         var gameOverTitle: String? = nil
-        if self.board.isWinForPlayer(self.board.currentPlayer) {
+        if self.board.isWin(for: self.board.currentPlayer) {
             gameOverTitle = "\(self.board.currentPlayer.name!) Wins!"
         } else if self.board.isFull() {
             gameOverTitle = "Draw!"
         }
         
         if let title = gameOverTitle {
-            let alert = UIAlertController(title: title, message: nil, preferredStyle: UIAlertControllerStyle.Alert)
+            let alert = UIAlertController(title: title, message: nil, preferredStyle: UIAlertControllerStyle.alert)
             
-            let alertAction = UIAlertAction(title: "Play Again", style: UIAlertActionStyle.Default) {_ in
+            let alertAction = UIAlertAction(title: "Play Again", style: UIAlertActionStyle.default) {_ in
                 self.resetBoard()
             }
             
             alert.addAction(alertAction)
             
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
             
             return
         }
@@ -166,31 +162,31 @@ class AAPLViewController: UIViewController {
         self.navigationController!.navigationBar.backgroundColor = self.board.currentPlayer.color!
         
         #if USE_AI_PLAYER
-            if self.board.currentPlayer.chip == AAPLChip.Black {
+            if self.board.currentPlayer.chip == AAPLChip.black {
                 // Disable buttons & show spinner while AI player "thinks".
                 for button in self.columnButtons {
-                    button.enabled = false
+                    button.isEnabled = false
                 }
-                let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.Gray)
+                let spinner = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.gray)
                 
                 spinner.startAnimating()
                 
                 self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: spinner)
                 
                 // Invoke GKMinmaxStrategist on background queue -- all that lookahead might take a while.
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+                DispatchQueue.global(qos: .default).async {
                     let strategistTime = CFAbsoluteTimeGetCurrent()
                     let column = self.columnForAIMove()
                     let delta = CFAbsoluteTimeGetCurrent() - strategistTime
                     
-                    let  aiTimeCeiling: NSTimeInterval = 2.0
+                    let  aiTimeCeiling: TimeInterval = 2.0
                     
                     /*
                     Make the player wait for the AI for a minimum time so that they
                     notice the AI moving even if it's fast.
                     */
                     let delay = min(aiTimeCeiling - delta, aiTimeCeiling)
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(delay) * Int64(NSEC_PER_SEC)), dispatch_get_main_queue()) {
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now()+delay) {
                         self.makeAIMoveInColumn(column)
                     }
                 
@@ -201,7 +197,7 @@ class AAPLViewController: UIViewController {
     
     private func columnForAIMove() -> Int {
         
-        let aiMove = self.strategist.bestMoveForPlayer(self.board.currentPlayer) as! AAPLMove?
+        let aiMove = self.strategist.bestMove(for: self.board.currentPlayer) as! AAPLMove?
         
         assert(aiMove != nil, "AI should always be able to move (detect endgame before invoking AI)")
         
@@ -210,7 +206,7 @@ class AAPLViewController: UIViewController {
         return column
     }
     
-    private func makeAIMoveInColumn(column: Int) {
+    private func makeAIMoveInColumn(_ column: Int) {
         // Done "thinking", hide spinner.
         self.navigationItem.leftBarButtonItem = nil
         
